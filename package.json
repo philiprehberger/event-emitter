@@ -1,6 +1,6 @@
 {
   "name": "@philiprehberger/ts-event-emitter",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Tiny, fully type-safe event emitter for Node, browser, and edge runtimes",
   "type": "module",
   "main": "./dist/index.cjs",
