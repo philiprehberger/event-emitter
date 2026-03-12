@@ -1,11 +1,11 @@
-# @philiprehberger/ts-event-emitter
+# @philiprehberger/event-emitter
 
 Tiny, fully type-safe event emitter for Node, browser, and edge runtimes.
 
 ## Installation
 
 ```bash
-npm install @philiprehberger/ts-event-emitter
+npm install @philiprehberger/event-emitter
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install @philiprehberger/ts-event-emitter
 ### Basic
 
 ```ts
-import { createEmitter } from '@philiprehberger/ts-event-emitter';
+import { createEmitter } from '@philiprehberger/event-emitter';
 
 type Events = {
   'user:login': { userId: string };
