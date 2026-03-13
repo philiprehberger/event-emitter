@@ -9,8 +9,10 @@ export interface Emitter<E extends EventMap> {
   emit<K extends keyof E>(event: K, data: E[K]): void;
   waitFor<K extends keyof E>(event: K): Promise<E[K]>;
   onAny(listener: AnyListener<E>): () => void;
+  onceAny(listener: AnyListener<E>): () => void;
   offAll(event?: keyof E): void;
   listenerCount(event: keyof E): number;
+  eventNames(): (keyof E)[];
 }
 
 export interface EmitterOptions {
@@ -63,14 +65,26 @@ export function createEmitter<E extends EventMap>(options: EmitterOptions = {}):
   }
 
   function emit<K extends keyof E>(event: K, data: E[K]): void {
+    const errors: unknown[] = [];
     const set = listeners.get(event);
     if (set) {
       for (const listener of [...set]) {
-        listener(data);
+        try {
+          listener(data);
+        } catch (e) {
+          errors.push(e);
+        }
       }
     }
     for (const listener of [...anyListeners]) {
-      listener(event, data);
+      try {
+        listener(event, data);
+      } catch (e) {
+        errors.push(e);
+      }
+    }
+    if (errors.length > 0) {
+      throw new AggregateError(errors, `${errors.length} listener(s) threw during emit("${String(event)}")`);
     }
   }
 
@@ -100,5 +114,21 @@ export function createEmitter<E extends EventMap>(options: EmitterOptions = {}):
     return listeners.get(event)?.size ?? 0;
   }
 
-  return { on, once, off, emit, waitFor, onAny, offAll, listenerCount };
+  function onceAny(listener: AnyListener<E>): () => void {
+    const wrapper = (<K extends keyof E>(event: K, data: E[K]) => {
+      off$any(wrapper);
+      listener(event, data);
+    }) as AnyListener<E>;
+    return onAny(wrapper);
+  }
+
+  function off$any(listener: AnyListener<E>): void {
+    anyListeners.delete(listener);
+  }
+
+  function eventNames(): (keyof E)[] {
+    return Array.from(listeners.keys()).filter((k) => listeners.get(k)!.size > 0);
+  }
+
+  return { on, once, off, emit, waitFor, onAny, onceAny, offAll, listenerCount, eventNames };
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+- Add error isolation in `emit()` — one throwing listener no longer prevents subsequent listeners from executing; errors are collected and re-thrown as `AggregateError`
+- Add `onceAny()` method for one-time wildcard listeners
+- Add `eventNames()` method to list events with registered listeners
+
 ## 0.2.3
 
 - Fix npm package name references in README

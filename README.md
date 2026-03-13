@@ -58,6 +58,32 @@ console.log(data.userId); // typed
 emitter.onAny((event, data) => {
   console.log(`Event: ${String(event)}`, data);
 });
+
+// One-time wildcard
+emitter.onceAny((event, data) => {
+  console.log(`First event: ${String(event)}`, data);
+});
+```
+
+### Event Names
+
+```ts
+emitter.eventNames(); // returns array of event names with active listeners
+```
+
+### Error Isolation
+
+If a listener throws, remaining listeners still execute. Errors are collected and re-thrown as an `AggregateError`:
+
+```ts
+emitter.on('data', () => { throw new Error('fail'); });
+emitter.on('data', (d) => console.log(d)); // still runs
+
+try {
+  emitter.emit('data', payload);
+} catch (e) {
+  // AggregateError with all listener errors
+}
 ```
 
 ### Cleanup
@@ -105,6 +131,8 @@ Creates a new type-safe emitter. `E` is a record mapping event names to their pa
 | `onAny` | `(listener) => () => void` | Listen to all events. Listener receives `(event, data)`. |
 | `offAll` | `(event?) => void` | Remove all listeners for an event, or all listeners if no event given. |
 | `listenerCount` | `(event) => number` | Number of listeners for an event. |
+| `onceAny` | `(listener) => () => void` | Listen to all events once. Listener receives `(event, data)`. |
+| `eventNames` | `() => (keyof E)[]` | Array of event names that have at least one listener. |
 
 ## License
 
